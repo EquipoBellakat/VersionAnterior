@@ -194,7 +194,7 @@ async def generate_prediction(storm_id: str, horas: int = 48):
         # Generar predicción usando la función de traduccion.py
         predicciones = predecir_movimiento_organico(history, horas=horas)
         
-        # Graficar el mapa
+        # Graficar el mapa (mantenemos esto por compatibilidad, pero también devolvemos datos)
         ruta_imagen = graficar_mapa(history, predicciones, storm_id)
         
         # Obtener el nombre del archivo para la URL
@@ -203,6 +203,7 @@ async def generate_prediction(storm_id: str, horas: int = 48):
         return {
             "success": True,
             "storm_id": storm_id,
+            "history": history,  # Incluimos el historial para el mapa interactivo
             "predictions": predicciones,
             "image_path": f"/api/predictions/image/{filename}",
             "message": f"Predicción generada exitosamente. Cada punto representa 1 hora."
