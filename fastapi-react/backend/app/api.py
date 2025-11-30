@@ -1,13 +1,34 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os
+import sys
 from pymongo import MongoClient
 import json
 from bson import json_util 
-from fastapi import Response
 from datetime import datetime 
-from bson import ObjectId 
+from bson import ObjectId
+
+# Agregar el directorio backend al path para importar traduccion
+backend_dir = os.path.join(os.path.dirname(__file__), '..')
+sys.path.insert(0, backend_dir)
+
+# 👇 CRÍTICO: Configurar Cartopy ANTES de importar traduccion
+# Esto asegura que Cartopy use los datos locales
+cartopy_data_dir = os.path.join(backend_dir, "cartopy_data")
+if os.path.exists(cartopy_data_dir):
+    os.environ["CARTOPY_DATA_DIR"] = cartopy_data_dir
+    print(f"✅ Configurado Cartopy para usar datos locales: {cartopy_data_dir}")
+else:
+    print(f"⚠️  ADVERTENCIA: Directorio de Cartopy no encontrado: {cartopy_data_dir}")
+
+# Importar funciones de traduccion.py (esto también configurará Cartopy internamente)
+from traduccion import (
+    cargar_datos,
+    predecir_movimiento_organico,
+    graficar_mapa
+) 
 
 app = FastAPI()
 
@@ -35,6 +56,12 @@ print("Conectado a MongoDB desde api.py.")
 
 datos_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'datos')
 app.mount("/api/maps", StaticFiles(directory=datos_dir), name="maps")
+
+# Configurar directorio de predicciones
+predicciones_dir = os.path.join(backend_dir, 'predicciones')
+os.makedirs(predicciones_dir, exist_ok=True)
+# NOTA: No montamos /api/predictions aquí porque interferiría con los endpoints
+# En su lugar, usamos un endpoint específico para servir las imágenes
 
 def parse_mongo_json(data):
     results = []
@@ -136,3 +163,64 @@ async def get_unique_events():
     events_cursor = collection.aggregate(pipeline)
     results = parse_mongo_json(events_cursor)
     return results
+
+@app.post("/api/predictions/generate/{storm_id}", tags=["Predictions"])
+async def generate_prediction(storm_id: str, horas: int = 48):
+    """
+    Genera una predicción de movimiento para una tormenta específica.
+    Utiliza las funciones de traduccion.py para calcular y graficar la predicción.
+    """
+    try:
+        # Obtener el historial más reciente de la tormenta desde MongoDB
+        latest_snapshot = collection.find_one(
+            {"id": storm_id},
+            sort=[("snapshot_timestamp", -1)]
+        )
+        
+        if not latest_snapshot:
+            raise HTTPException(status_code=404, detail=f"No se encontró información para la tormenta {storm_id}")
+        
+        # Extraer el historial de la tormenta
+        history = latest_snapshot.get('history', [])
+        if not history or len(history) < 2:
+            raise HTTPException(
+                status_code=400, 
+                detail="No hay suficiente historial para generar una predicción (se necesitan al menos 2 puntos)"
+            )
+        
+        # Ordenar el historial por tiempo
+        history.sort(key=lambda x: datetime.strptime(x['time'], "%Y-%m-%d %H:%M:%S"))
+        
+        # Generar predicción usando la función de traduccion.py
+        predicciones = predecir_movimiento_organico(history, horas=horas)
+        
+        # Graficar el mapa
+        ruta_imagen = graficar_mapa(history, predicciones, storm_id)
+        
+        # Obtener el nombre del archivo para la URL
+        filename = os.path.basename(ruta_imagen)
+        
+        return {
+            "success": True,
+            "storm_id": storm_id,
+            "predictions": predicciones,
+            "image_path": f"/api/predictions/image/{filename}",
+            "message": f"Predicción generada exitosamente. Cada punto representa 1 hora."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar la predicción: {str(e)}")
+
+@app.get("/api/predictions/image/{filename}", tags=["Predictions"])
+async def get_prediction_image(filename: str):
+    """
+    Sirve las imágenes de predicción generadas.
+    """
+    file_path = os.path.join(predicciones_dir, filename)
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Imagen de predicción no encontrada")
+    
+    return FileResponse(file_path)

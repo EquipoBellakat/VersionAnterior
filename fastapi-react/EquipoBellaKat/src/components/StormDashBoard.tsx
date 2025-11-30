@@ -37,6 +37,19 @@ interface FullStormData {
   };
 }
 
+interface PredictionData {
+  success: boolean;
+  storm_id: string;
+  predictions: Array<{
+    step: number;
+    lat: number;
+    lon: number;
+    time: string;
+  }>;
+  image_path: string;
+  message: string;
+}
+
 export const StormDashboard = () => {
   const [stormList, setStormList] = useState<UniqueStorm[]>([]);
   const [selectedStormId, setSelectedStormId] = useState<string>("");
@@ -45,6 +58,8 @@ export const StormDashboard = () => {
     useState<HistoryPoint | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
+  const [generatingPrediction, setGeneratingPrediction] = useState(false);
 
   useEffect(() => {
     const fetchUniqueStorms = async () => {
@@ -96,6 +111,38 @@ export const StormDashboard = () => {
     setSelectedStormId("");
     setStormHistory([]);
     setSelectedHistoryPoint(null);
+    setPredictionData(null);
+  };
+
+  const handleGeneratePrediction = async () => {
+    if (!selectedStormId) return;
+    
+    setGeneratingPrediction(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/predictions/generate/${selectedStormId}?horas=48`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+        throw new Error(errorData.detail || 'Error al generar la predicción');
+      }
+      
+      const data: PredictionData = await response.json();
+      setPredictionData(data);
+    } catch (error) {
+      console.error("Error generando predicción:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Error al generar la predicción';
+      alert(`Error al generar la predicción: ${errorMessage}`);
+    } finally {
+      setGeneratingPrediction(false);
+    }
   };
 
   const handleDateSelect = (selectedTime: string) => {
@@ -325,6 +372,42 @@ export const StormDashboard = () => {
                     />
                   ) : (
                       <Text className={styles.mapPlaceholderText}>MAPA (FORECAST NO DISPONIBLE)</Text>
+                  )}
+                </Box>
+                <Box className={styles.predictionSection}>
+                  <Box className={styles.predictionHeader}>
+                    <Text className={styles.predictionTitle}>PREDICCIÓN DE MOVIMIENTO</Text>
+                    <button
+                      className={styles.generateButton}
+                      onClick={handleGeneratePrediction}
+                      disabled={generatingPrediction}
+                    >
+                      {generatingPrediction ? (
+                        <>
+                          <Spinner size="sm" mr={2} />
+                          Generando...
+                        </>
+                      ) : (
+                        "Generar Predicción (48h)"
+                      )}
+                    </button>
+                  </Box>
+                  {predictionData && (
+                    <Box className={styles.predictionContent}>
+                      <Box className={styles.mapPlaceholder}>
+                        <Image
+                          src={`http://localhost:8000${predictionData.image_path}`}
+                          alt="Predicción de movimiento"
+                          objectFit="contain"
+                          maxHeight="100%"
+                          width="100%"
+                          height="auto"
+                        />
+                      </Box>
+                      <Text className={styles.predictionInfo}>
+                        {predictionData.message}
+                      </Text>
+                    </Box>
                   )}
                 </Box>
                   <Box className={styles.dataSection}>
