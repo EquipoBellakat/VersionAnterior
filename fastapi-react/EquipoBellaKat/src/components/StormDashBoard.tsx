@@ -3,6 +3,7 @@ import { Box, Text, Spinner, Image } from "@chakra-ui/react";
 import styles from "./StormDashBoard.module.css";
 import { Calendar } from "./Calendar";
 import { LogosBar } from "./LogosBar";
+import { InteractivePredictionMap } from "./InteractivePredictionMap";
 
 // --- Interfaces ---
 interface UniqueStorm {
@@ -40,6 +41,7 @@ interface FullStormData {
 interface PredictionData {
   success: boolean;
   storm_id: string;
+  history?: HistoryPoint[];  // Historial para el mapa interactivo
   predictions: Array<{
     step: number;
     lat: number;
@@ -394,14 +396,11 @@ export const StormDashboard = () => {
                   </Box>
                   {predictionData && (
                     <Box className={styles.predictionContent}>
-                      <Box className={styles.mapPlaceholder}>
-                        <Image
-                          src={`http://localhost:8000${predictionData.image_path}`}
-                          alt="Predicción de movimiento"
-                          objectFit="contain"
-                          maxHeight="100%"
-                          width="100%"
-                          height="auto"
+                      <Box className={styles.mapPlaceholder} style={{ padding: 0 }}>
+                        <InteractivePredictionMap
+                          history={predictionData.history}
+                          predictions={predictionData.predictions}
+                          stormId={predictionData.storm_id}
                         />
                       </Box>
                       <Text className={styles.predictionInfo}>
