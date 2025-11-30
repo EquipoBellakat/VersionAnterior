@@ -1,0 +1,160 @@
+.calendarContainer {
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #faf9f5 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(42, 60, 101, 0.12);
+  border: 2px solid rgba(215, 204, 157, 0.4);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .calendarContainer {
+        padding: 1rem;
+        border-radius: 6px;
+    }
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.monthTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+@media (max-width: 768px) {
+    .monthTitle {
+        font-size: 0.875rem;
+    }
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.weekDay {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 0.5rem 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+    .weekDay {
+        font-size: 0.6875rem;
+        padding: 0.375rem 0;
+    }
+}
+
+.weekDay.sunday {
+  color: #6b7280;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: default;
+  transition: background-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.calendarDay.availableDay {
+  cursor: pointer;
+  color: #374151;
+  font-weight: 500;
+}
+
+.calendarDay.availableDay:hover {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.calendarDay.disabledDay {
+  color: #d1d5db;
+  opacity: 0.4;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.calendarDay.disabledDay::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background-color: #d1d5db;
+  transform: rotate(-45deg);
+}
+
+.calendarDay.selectedDay {
+  background-color: #2A3C65;
+  color: #ffffff;
+  font-weight: 600;
+  border-color: #2A3C65;
+}
+
+.calendarDay.selectedDay:hover {
+  background-color: #1f2d4a;
+  border-color: #1f2d4a;
+}
+
+.calendarDay.sundayDay {
+  color: #374151;
+}
+
+.calendarDay.sundayDay.selectedDay {
+  background-color: #2A3C65;
+  color: #ffffff;
+}
+
+.calendarDay.disabledDay.sundayDay {
+  color: #d1d5db;
+}
+
+.dayNumber {
+  font-size: 0.875rem;
+  user-select: none;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+@media (max-width: 768px) {
+    .dayNumber {
+        font-size: 0.75rem;
+    }
+    
+    .calendarGrid {
+        gap: 0.125rem;
+    }
+    
+    .weekDays {
+        gap: 0.125rem;
+    }
+}
+

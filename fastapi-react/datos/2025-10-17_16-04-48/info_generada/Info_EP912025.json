@@ -1,0 +1,12 @@
+{
+    "id": "EP912025",
+    "name": "91E",
+    "invest": true,
+    "created_at": "2025-10-17 16:05:07",
+    "realtime_formation_prob": {
+        "prob_2day": "20%",
+        "risk_2day": "Low",
+        "prob_7day": "20%",
+        "risk_7day": "Low"
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "id": "AL982025",
+    "name": "98L",
+    "invest": true,
+    "created_at": "2025-10-20 07:12:37",
+    "realtime_formation_prob": {
+        "prob_2day": "50%",
+        "risk_2day": "Medium",
+        "prob_7day": "80%",
+        "risk_7day": "High"
+    }
+}

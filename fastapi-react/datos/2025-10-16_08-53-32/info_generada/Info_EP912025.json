@@ -1,0 +1,11 @@
+{
+    "id": "EP912025",
+    "name": "91E",
+    "invest": true,
+    "realtime_formation_prob": {
+        "prob_2day": "50%",
+        "risk_2day": "Medium",
+        "prob_7day": "60%",
+        "risk_7day": "Medium"
+    }
+}

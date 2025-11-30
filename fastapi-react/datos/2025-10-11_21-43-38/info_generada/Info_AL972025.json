@@ -1,0 +1,11 @@
+{
+    "id": "AL972025",
+    "name": "97L",
+    "invest": true,
+    "realtime_formation_prob": {
+        "prob_2day": "30%",
+        "risk_2day": "Low",
+        "prob_7day": "50%",
+        "risk_7day": "Medium"
+    }
+}

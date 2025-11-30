@@ -1,0 +1,74 @@
+.logosBarContainer {
+  width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border-top: 2px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 2rem 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.logosBar {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.logosTrack {
+  display: flex;
+  gap: 4rem;
+  width: fit-content;
+  animation: scroll 30s linear infinite;
+}
+
+.logoItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 3rem;
+  height: 60px;
+}
+
+.logoImage {
+  width: auto;
+  height: 100%;
+  max-width: 150px;
+  object-fit: contain;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-20%);
+  }
+}
+
+/* Pausar animación al hacer hover */
+.logosBarContainer:hover .logosTrack {
+  animation-play-state: paused;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logosBarContainer {
+    padding: 1rem 0;
+  }
+  
+  .logoItem {
+    padding: 0 2rem;
+    height: 50px;
+  }
+  
+  .logosTrack {
+    gap: 2rem;
+  }
+  
+  .logoImage {
+    max-width: 120px;
+  }
+}
+
